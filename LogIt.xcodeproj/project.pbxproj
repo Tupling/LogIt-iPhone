@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3360D7C6191BD2A600A76398 /* VSAddVehicleController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3360D7C5191BD2A600A76398 /* VSAddVehicleController.m */; };
+		3360D7C9191BFA5500A76398 /* VSVehicleInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 3360D7C8191BFA5500A76398 /* VSVehicleInfo.m */; };
+		3360D7CC191BFB7700A76398 /* VSVehicles.m in Sources */ = {isa = PBXBuildFile; fileRef = 3360D7CB191BFB7700A76398 /* VSVehicles.m */; };
 		3366DC32191AF1410062E4E0 /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3366DC31191AF1410062E4E0 /* Accounts.framework */; };
 		3366DC34191AF16E0062E4E0 /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3366DC33191AF16E0062E4E0 /* Twitter.framework */; };
 		3366DC36191AF3390062E4E0 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3366DC35191AF3390062E4E0 /* Social.framework */; };
@@ -47,6 +50,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3360D7C4191BD2A600A76398 /* VSAddVehicleController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VSAddVehicleController.h; sourceTree = "<group>"; };
+		3360D7C5191BD2A600A76398 /* VSAddVehicleController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VSAddVehicleController.m; sourceTree = "<group>"; };
+		3360D7C7191BFA5500A76398 /* VSVehicleInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VSVehicleInfo.h; sourceTree = "<group>"; };
+		3360D7C8191BFA5500A76398 /* VSVehicleInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VSVehicleInfo.m; sourceTree = "<group>"; };
+		3360D7CA191BFB7700A76398 /* VSVehicles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VSVehicles.h; sourceTree = "<group>"; };
+		3360D7CB191BFB7700A76398 /* VSVehicles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VSVehicles.m; sourceTree = "<group>"; };
 		3366DC31191AF1410062E4E0 /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
 		3366DC33191AF16E0062E4E0 /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		3366DC35191AF3390062E4E0 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
@@ -171,6 +180,12 @@
 				33AC1358191869AC00C1E47A /* VSViewController.m */,
 				33AC135A191869AC00C1E47A /* Images.xcassets */,
 				33AC1349191869AC00C1E47A /* Supporting Files */,
+				3360D7C4191BD2A600A76398 /* VSAddVehicleController.h */,
+				3360D7C5191BD2A600A76398 /* VSAddVehicleController.m */,
+				3360D7C7191BFA5500A76398 /* VSVehicleInfo.h */,
+				3360D7C8191BFA5500A76398 /* VSVehicleInfo.m */,
+				3360D7CA191BFB7700A76398 /* VSVehicles.h */,
+				3360D7CB191BFB7700A76398 /* VSVehicles.m */,
 			);
 			path = LogIt;
 			sourceTree = "<group>";
@@ -303,6 +318,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				33AC1359191869AC00C1E47A /* VSViewController.m in Sources */,
+				3360D7CC191BFB7700A76398 /* VSVehicles.m in Sources */,
+				3360D7C6191BD2A600A76398 /* VSAddVehicleController.m in Sources */,
+				3360D7C9191BFA5500A76398 /* VSVehicleInfo.m in Sources */,
 				33AC134F191869AC00C1E47A /* main.m in Sources */,
 				33AC1353191869AC00C1E47A /* VSAppDelegate.m in Sources */,
 			);

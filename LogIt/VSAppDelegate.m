@@ -13,14 +13,13 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    //Parse App ID and Key
-    //
     //Required
-    //
-    [Parse setApplicationId:@"8AvobwjpT11AxqRGOcQft51tB5OhIYsAp9cdoKa7"
-                  clientKey:@"DqVUpVI5HfgydWfxWeSqvYQPMKSkPskmDnaRnika"];
+    //Parse App ID and Key
+   
+    [Parse setApplicationId:@"dmSu69A9G1bgTrZYXMP3pAby8fiwYdefw8tXjumi"
+                  clientKey:@"5Ug218rLZApSrZw7XsSi8NIaQhEuTh1gZU7VPMFg"];
+
     
-    //Parse Analytics
     return YES;
 }
 							
