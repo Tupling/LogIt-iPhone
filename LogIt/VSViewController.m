@@ -142,8 +142,9 @@
 //Login Failed Method
 -(void)logInViewController:(PFLogInViewController *)logInController didFailToLogInWithError:(NSError *)error
 {
-    
-    [self dismissViewControllerAnimated:YES completion:nil];
+    if([error code] == 101){
+   [[[UIAlertView alloc] initWithTitle:@"Login Failed" message:@"Invalid login credentials. Please check your username and password and try again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+    }
 }
 
 
