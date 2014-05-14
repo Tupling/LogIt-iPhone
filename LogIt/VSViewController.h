@@ -24,4 +24,6 @@
 @property (nonatomic, strong) IBOutlet UITableView *tableView;
 @property (nonatomic, strong) NSMutableArray *vehicleArr;
 
+-(void)loading:(NSString*)msg;
+
 @end

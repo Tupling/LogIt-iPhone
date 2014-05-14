@@ -37,6 +37,7 @@
 		33AC138619186C5C00C1E47A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33AC138519186C5C00C1E47A /* Security.framework */; };
 		33AC138819186C6200C1E47A /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33AC138719186C6200C1E47A /* StoreKit.framework */; };
 		33AC138A19186C6700C1E47A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33AC138919186C6700C1E47A /* SystemConfiguration.framework */; };
+		33CE9A8D1922496700173A0E /* VSVehicleDetailsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 33CE9A8C1922496700173A0E /* VSVehicleDetailsController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +89,8 @@
 		33AC138519186C5C00C1E47A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		33AC138719186C6200C1E47A /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		33AC138919186C6700C1E47A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		33CE9A8B1922496700173A0E /* VSVehicleDetailsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VSVehicleDetailsController.h; sourceTree = "<group>"; };
+		33CE9A8C1922496700173A0E /* VSVehicleDetailsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VSVehicleDetailsController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -173,19 +176,12 @@
 		33AC1348191869AC00C1E47A /* LogIt */ = {
 			isa = PBXGroup;
 			children = (
-				33AC1351191869AC00C1E47A /* VSAppDelegate.h */,
-				33AC1352191869AC00C1E47A /* VSAppDelegate.m */,
 				33AC1354191869AC00C1E47A /* Main.storyboard */,
-				33AC1357191869AC00C1E47A /* VSViewController.h */,
-				33AC1358191869AC00C1E47A /* VSViewController.m */,
+				33CE9A8A192247D000173A0E /* AppDelegate */,
+				33CE9A89192247C000173A0E /* Controllers */,
+				33CE9A88192247B400173A0E /* Models */,
 				33AC135A191869AC00C1E47A /* Images.xcassets */,
 				33AC1349191869AC00C1E47A /* Supporting Files */,
-				3360D7C4191BD2A600A76398 /* VSAddVehicleController.h */,
-				3360D7C5191BD2A600A76398 /* VSAddVehicleController.m */,
-				3360D7C7191BFA5500A76398 /* VSVehicleInfo.h */,
-				3360D7C8191BFA5500A76398 /* VSVehicleInfo.m */,
-				3360D7CA191BFB7700A76398 /* VSVehicles.h */,
-				3360D7CB191BFB7700A76398 /* VSVehicles.m */,
 			);
 			path = LogIt;
 			sourceTree = "<group>";
@@ -217,6 +213,39 @@
 				33AC136A191869AC00C1E47A /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		33CE9A88192247B400173A0E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3360D7C7191BFA5500A76398 /* VSVehicleInfo.h */,
+				3360D7C8191BFA5500A76398 /* VSVehicleInfo.m */,
+				3360D7CA191BFB7700A76398 /* VSVehicles.h */,
+				3360D7CB191BFB7700A76398 /* VSVehicles.m */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		33CE9A89192247C000173A0E /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				33AC1357191869AC00C1E47A /* VSViewController.h */,
+				33AC1358191869AC00C1E47A /* VSViewController.m */,
+				3360D7C4191BD2A600A76398 /* VSAddVehicleController.h */,
+				3360D7C5191BD2A600A76398 /* VSAddVehicleController.m */,
+				33CE9A8B1922496700173A0E /* VSVehicleDetailsController.h */,
+				33CE9A8C1922496700173A0E /* VSVehicleDetailsController.m */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
+		33CE9A8A192247D000173A0E /* AppDelegate */ = {
+			isa = PBXGroup;
+			children = (
+				33AC1351191869AC00C1E47A /* VSAppDelegate.h */,
+				33AC1352191869AC00C1E47A /* VSAppDelegate.m */,
+			);
+			name = AppDelegate;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -321,6 +350,7 @@
 				3360D7CC191BFB7700A76398 /* VSVehicles.m in Sources */,
 				3360D7C6191BD2A600A76398 /* VSAddVehicleController.m in Sources */,
 				3360D7C9191BFA5500A76398 /* VSVehicleInfo.m in Sources */,
+				33CE9A8D1922496700173A0E /* VSVehicleDetailsController.m in Sources */,
 				33AC134F191869AC00C1E47A /* main.m in Sources */,
 				33AC1353191869AC00C1E47A /* VSAppDelegate.m in Sources */,
 			);

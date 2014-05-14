@@ -13,6 +13,7 @@
 @property (nonatomic, strong) NSString *vMake;
 @property (nonatomic, strong) NSString *vModel;
 @property (nonatomic, strong) NSNumber *vYear;
+@property (nonatomic, strong) NSString *vObjectId;
 
 
 

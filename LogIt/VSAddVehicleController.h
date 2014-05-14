@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <Parse/Parse.h>
+#import "VSVehicleInfo.h"
 
 
 @interface VSAddVehicleController : UIViewController
@@ -16,8 +17,13 @@
     IBOutlet UITextField *make;
     IBOutlet UITextField *model;
     IBOutlet UITextField *year;
+    IBOutlet UILabel *headingLabel;
 }
 
+@property (nonatomic, strong)VSVehicleInfo *details;
+@property (nonatomic, strong) IBOutlet UITextField *make;
+@property (nonatomic, strong) IBOutlet UITextField *model;
+@property (nonatomic, strong) IBOutlet UITextField *year;
 
 -(IBAction)saveVehicle:(id)sender;
 @end

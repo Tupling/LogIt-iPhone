@@ -8,6 +8,7 @@
 
 #import "VSAppDelegate.h"
 #import <Parse/Parse.h>
+#import "VSViewController.h"
 
 @implementation VSAppDelegate
 

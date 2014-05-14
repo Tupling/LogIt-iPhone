@@ -7,21 +7,39 @@
 //
 
 #import "VSViewController.h"
+#import "VSVehicleDetailsController.h"
+#import "VSAddVehicleController.h"
 
-@interface VSViewController () <PFLogInViewControllerDelegate, PFSignUpViewControllerDelegate>
+@interface VSViewController () <UIAlertViewDelegate>
 {
+    UIActivityIndicatorView *loading;
+    UIAlertView *loadingAlert;
+    UIAlertView *logOutAlert;
+    UIAlertView *deleteObject;
 
 }
 
 @end
 
 @implementation VSViewController
+
+    bool delete = NO;
+
 -(void)viewDidAppear:(BOOL)animated
 {
-
+    
     //check for logged in user
     if ([PFUser currentUser]) {
+        
+        if (_vehicleArr.count < 1) {
+            
         [self loadData];
+            
+        }else{
+        
+        [self.tableView reloadData];
+            
+        }
         
     } else {
         //force login if not
@@ -30,12 +48,18 @@
     
 }
 
-
-
-
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    //Loading indicator
+    
+    
+    
+    [super viewDidAppear:animated];
+}
 -(void)loadData
 {
-    
+    [self loading:@"Loading Vehicles"];
     //Remove all object before loading screen
     [_vehicleArr removeAllObjects];
     
@@ -51,6 +75,7 @@
                 _vehicleInfo.vMake = [objects[i] valueForKey:@"make"];
                 _vehicleInfo.vModel = [objects[i] valueForKey:@"model"];
                 _vehicleInfo.vYear = [objects[i] valueForKey:@"year"];
+                _vehicleInfo.vObjectId = [objects[i] valueForKey:@"objectId"];
                 
                 if(_vehicles != nil){
                     _vehicleArr = _vehicles.vehiclesArray;
@@ -67,15 +92,28 @@
         NSLog(@"%lu", (unsigned long)[_vehicleArr count]);
         //Reload table data
         [self.tableView reloadData];
-        
+        [self stopLoading];
     }];
+}
+
+//Loading Alert
+-(void)loading:(NSString*)msg
+{
+    loadingAlert = [[UIAlertView alloc] initWithTitle:nil message:[NSString stringWithFormat:@"%@", msg] delegate:self cancelButtonTitle:nil otherButtonTitles:nil, nil];
+    [loadingAlert show];
+}
+
+//Dismiss loading alert
+-(void)stopLoading
+{
+    [loadingAlert dismissWithClickedButtonIndex:0 animated:YES];
 }
 
 #pragma mark TableView Methods
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-
+    
     
     return [_vehicleArr count];
 }
@@ -105,7 +143,7 @@
         vehicleMake.text = vehicleInfo.vMake;
         vehicleModel.text = vehicleInfo.vModel;
     }
-
+    
     
     return cell;
 }
@@ -113,11 +151,54 @@
 
 //Future Development
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-   
- //TODO
+    
+    
+    
+    _vehicleInfo = [_vehicleArr objectAtIndex:indexPath.row];
+    
+    NSLog(@"%@", _vehicleInfo.vYear);
+    [self performSegueWithIdentifier:@"details" sender:nil];
+    
+    //Deselect Item
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
 }
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return YES;
+}
 
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if(editingStyle == UITableViewCellEditingStyleDelete){
+        
+        _vehicleInfo = [_vehicleArr objectAtIndex:indexPath.row];
+        
+        
+        
+    
+        
+        deleteObject = [[UIAlertView alloc] initWithTitle:@"Delete Vehicle" message:@"Are you sure you want to delete this vehicle?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Yes", nil];
+        
+        [deleteObject show];
+
+
+        
+    }
+}
+
+
+
+//Navigate views
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    
+    if ([segue.identifier isEqualToString:@"details"]) {
+        
+        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+        VSVehicleDetailsController *detailsView = segue.destinationViewController;
+        detailsView.details = [_vehicleArr objectAtIndex:indexPath.row];
+    }
+}
 
 
 -(void)requireLogin
@@ -143,7 +224,7 @@
 -(void)logInViewController:(PFLogInViewController *)logInController didFailToLogInWithError:(NSError *)error
 {
     if([error code] == 101){
-   [[[UIAlertView alloc] initWithTitle:@"Login Failed" message:@"Invalid login credentials. Please check your username and password and try again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+        [[[UIAlertView alloc] initWithTitle:@"Login Failed" message:@"Invalid login credentials. Please check your username and password and try again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
     }
 }
 
@@ -153,8 +234,7 @@
 - (void)logInViewController:(PFLogInViewController *)logInController didLogInUser:(PFUser *)user
 {
     NSLog(@"%@ Logged In",[[PFUser currentUser] username]);
-
-
+    
     
     [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -200,15 +280,46 @@
 
 -(IBAction)logOut:(id)sender
 {
-    [PFUser logOut];
-    NSLog(@"User Logged Out!");
     
-    //Remove all object before signing user out
-    [_vehicleArr removeAllObjects];
-    [self.tableView reloadData];
     
-    //require use to login in
-    [self requireLogin];
+    logOutAlert = [[UIAlertView alloc] initWithTitle:@"Logout User" message:@"Are you sure you want to logout?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Yes", nil];
+    
+    [logOutAlert show];
+    
+    
+}
+
+//Alert user of actions
+-(void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    if(alertView == logOutAlert){
+        if(buttonIndex == 1){
+            
+            [PFUser logOut];
+            NSLog(@"User Logged Out!");
+            
+            //Remove all object before signing user out
+            [_vehicleArr removeAllObjects];
+            [self.tableView reloadData];
+            
+            //require use to login in
+            [self requireLogin];
+        }
+    }else if (alertView == deleteObject){
+        
+        if (buttonIndex == 1) {
+            
+            PFObject *vehicle = [PFObject objectWithoutDataWithClassName:@"Vehicles" objectId:_vehicleInfo.vObjectId];
+            
+            //Delete object from database
+            [vehicle deleteInBackground];
+
+            //Reload data from server
+            [self loadData];
+
+        }
+
+    }
 }
 
 @end
