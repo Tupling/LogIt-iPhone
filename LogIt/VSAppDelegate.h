@@ -7,9 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Reachability.h"
+#import <SystemConfiguration/SystemConfiguration.h>
+
+#define ApplicationDelegate ((SSAppDelegate *)[UIApplication sharedApplication].delegate)
 
 @interface VSAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+
+-(BOOL)isConnected;
 
 @end

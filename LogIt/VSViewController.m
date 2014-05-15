@@ -9,6 +9,7 @@
 #import "VSViewController.h"
 #import "VSVehicleDetailsController.h"
 #import "VSAddVehicleController.h"
+#import "VSAppDelegate.h"
 
 @interface VSViewController () <UIAlertViewDelegate>
 {
@@ -16,6 +17,7 @@
     UIAlertView *loadingAlert;
     UIAlertView *logOutAlert;
     UIAlertView *deleteObject;
+    
 
 }
 
@@ -27,18 +29,24 @@
 
 -(void)viewDidAppear:(BOOL)animated
 {
+     VSAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
     
+    BOOL connected = [appDelegate isConnected];
     //check for logged in user
     if ([PFUser currentUser]) {
-        
-        if (_vehicleArr.count < 1) {
+        if (connected == YES) {
             
-        [self loadData];
+            [self loadData];
+        }else {
             
-        }else{
-        
-        [self.tableView reloadData];
+            //TODO:
+            //Load data from Cache. Future Development
             
+            
+            
+            UIAlertView *noConnection = [[UIAlertView alloc] initWithTitle:@"No Connection" message:@"You do not have an active network connection. At this time we are unable to load your vehicles" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+            
+            [noConnection show];
         }
         
     } else {
@@ -51,11 +59,7 @@
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    //Loading indicator
-    
-    
-    
-    [super viewDidAppear:animated];
+
 }
 -(void)loadData
 {
@@ -174,15 +178,19 @@
         
         _vehicleInfo = [_vehicleArr objectAtIndex:indexPath.row];
         
+       VSAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
         
-        
-    
-        
+        BOOL connected = [appDelegate isConnected];
+        if (connected == YES) {
         deleteObject = [[UIAlertView alloc] initWithTitle:@"Delete Vehicle" message:@"Are you sure you want to delete this vehicle?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Yes", nil];
         
         [deleteObject show];
 
-
+        }else{
+            UIAlertView *noConnection = [[UIAlertView alloc] initWithTitle:@"No Connection" message:@"You do not have an active connection. Please connect to a network and try again" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+            
+            [noConnection show];
+        }
         
     }
 }
@@ -305,6 +313,8 @@
             //require use to login in
             [self requireLogin];
         }
+        
+        //Delete object if user acknowledges action
     }else if (alertView == deleteObject){
         
         if (buttonIndex == 1) {

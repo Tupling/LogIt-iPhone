@@ -21,8 +21,8 @@
 }
 
 @property (nonatomic, strong)VSVehicleInfo *details;
-@property (nonatomic, strong) IBOutlet UITextField *make;
-@property (nonatomic, strong) IBOutlet UITextField *model;
+@property (nonatomic, retain) IBOutlet UITextField *make;
+@property (nonatomic, retain) IBOutlet UITextField *model;
 @property (nonatomic, strong) IBOutlet UITextField *year;
 
 -(IBAction)saveVehicle:(id)sender;

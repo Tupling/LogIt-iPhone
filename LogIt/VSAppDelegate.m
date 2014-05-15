@@ -10,6 +10,7 @@
 #import <Parse/Parse.h>
 #import "VSViewController.h"
 
+
 @implementation VSAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -22,6 +23,15 @@
 
     
     return YES;
+}
+
+-(BOOL)isConnected
+{
+    Reachability *connected = [Reachability reachabilityForInternetConnection];
+    
+    NetworkStatus status = [connected currentReachabilityStatus];
+    
+    return status;
 }
 							
 - (void)applicationWillResignActive:(UIApplication *)application

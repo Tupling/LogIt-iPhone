@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3339F5B51925251000BAB927 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 3339F5B41925251000BAB927 /* Reachability.m */; };
 		3360D7C6191BD2A600A76398 /* VSAddVehicleController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3360D7C5191BD2A600A76398 /* VSAddVehicleController.m */; };
 		3360D7C9191BFA5500A76398 /* VSVehicleInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 3360D7C8191BFA5500A76398 /* VSVehicleInfo.m */; };
 		3360D7CC191BFB7700A76398 /* VSVehicles.m in Sources */ = {isa = PBXBuildFile; fileRef = 3360D7CB191BFB7700A76398 /* VSVehicles.m */; };
@@ -51,6 +52,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3339F5B31925251000BAB927 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
+		3339F5B41925251000BAB927 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		3360D7C4191BD2A600A76398 /* VSAddVehicleController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VSAddVehicleController.h; sourceTree = "<group>"; };
 		3360D7C5191BD2A600A76398 /* VSAddVehicleController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VSAddVehicleController.m; sourceTree = "<group>"; };
 		3360D7C7191BFA5500A76398 /* VSVehicleInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VSVehicleInfo.h; sourceTree = "<group>"; };
@@ -218,6 +221,8 @@
 		33CE9A88192247B400173A0E /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				3339F5B31925251000BAB927 /* Reachability.h */,
+				3339F5B41925251000BAB927 /* Reachability.m */,
 				3360D7C7191BFA5500A76398 /* VSVehicleInfo.h */,
 				3360D7C8191BFA5500A76398 /* VSVehicleInfo.m */,
 				3360D7CA191BFB7700A76398 /* VSVehicles.h */,
@@ -348,6 +353,7 @@
 			files = (
 				33AC1359191869AC00C1E47A /* VSViewController.m in Sources */,
 				3360D7CC191BFB7700A76398 /* VSVehicles.m in Sources */,
+				3339F5B51925251000BAB927 /* Reachability.m in Sources */,
 				3360D7C6191BD2A600A76398 /* VSAddVehicleController.m in Sources */,
 				3360D7C9191BFA5500A76398 /* VSVehicleInfo.m in Sources */,
 				33CE9A8D1922496700173A0E /* VSVehicleDetailsController.m in Sources */,
