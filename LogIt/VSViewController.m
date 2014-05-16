@@ -18,18 +18,18 @@
     UIAlertView *logOutAlert;
     UIAlertView *deleteObject;
     
-
+    
 }
 
 @end
 
 @implementation VSViewController
 
-    bool delete = NO;
+bool delete = NO;
 
 -(void)viewDidAppear:(BOOL)animated
 {
-     VSAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+    VSAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
     
     BOOL connected = [appDelegate isConnected];
     //check for logged in user
@@ -59,7 +59,7 @@
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-
+    
 }
 -(void)loadData
 {
@@ -178,14 +178,14 @@
         
         _vehicleInfo = [_vehicleArr objectAtIndex:indexPath.row];
         
-       VSAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+        VSAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
         
         BOOL connected = [appDelegate isConnected];
         if (connected == YES) {
-        deleteObject = [[UIAlertView alloc] initWithTitle:@"Delete Vehicle" message:@"Are you sure you want to delete this vehicle?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Yes", nil];
-        
-        [deleteObject show];
-
+            deleteObject = [[UIAlertView alloc] initWithTitle:@"Delete Vehicle" message:@"Are you sure you want to delete this vehicle?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Yes", nil];
+            
+            [deleteObject show];
+            
         }else{
             UIAlertView *noConnection = [[UIAlertView alloc] initWithTitle:@"No Connection" message:@"You do not have an active connection. Please connect to a network and try again" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
             
@@ -249,24 +249,40 @@
 
 - (BOOL)logInViewController:(PFLogInViewController *)logInController shouldBeginLogInWithUsername:(NSString *)username password:(NSString *)password {
     
-    // Check if both fields are completed
-    if (username && password && username.length && password.length) {
-        return YES;
+    
+    VSAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+    
+    BOOL connected = [appDelegate isConnected];
+    
+    if (connected) {
         
-    }  else if(username.length < 1 && password.length < 1) {
-        [[[UIAlertView alloc] initWithTitle:@"Missing Information" message:@"You did not enter a user name or password!"delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+        // Check if both fields are completed
+        if (username && password && username.length && password.length) {
+            return YES;
+            
+        } else if(username.length < 1 && password.length < 1) {
+            [[[UIAlertView alloc] initWithTitle:@"Missing Information" message:@"You did not enter a user name or password!"delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+            
+        }else if(username.length < 1) {
+            [[[UIAlertView alloc] initWithTitle:@"Missing Username" message:@"You did not enter a username!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+            
+        } else if(password.length < 1) {
+            [[[UIAlertView alloc] initWithTitle:@"Missing Password" message:@"You did not enter a password!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+        } else if(username.length < 1 && password.length < 1) {
+            [[[UIAlertView alloc] initWithTitle:@"Missing Information" message:@"You did not enter a user name or password!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+        }
         
-    }else if(username.length < 1) {
-        [[[UIAlertView alloc] initWithTitle:@"Missing Username" message:@"You did not enter a username!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+        return NO;
         
-    } else if(password.length < 1) {
-        [[[UIAlertView alloc] initWithTitle:@"Missing Password" message:@"You did not enter a password!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
-    } else if(username.length < 1 && password.length < 1) {
-        [[[UIAlertView alloc] initWithTitle:@"Missing Information" message:@"You did not enter a user name or password!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+    }else{
+        
+        UIAlertView *noConnection = [[UIAlertView alloc] initWithTitle:@"No Connection" message:@"You do not have an active network connect. Please connect to a network and try again" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+        
+        [noConnection show];
+        
     }
-    
     return NO;
-    
+
 }
 
 
@@ -323,12 +339,12 @@
             
             //Delete object from database
             [vehicle deleteInBackground];
-
+            
             //Reload data from server
             [self loadData];
-
+            
         }
-
+        
     }
 }
 

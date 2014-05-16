@@ -237,7 +237,7 @@
 //Validate Vehicle Model
 -(BOOL)validateVehicleModel:(NSString*)string
 {
-    NSString *validCharacters = @"^[a-zA-Z0-9]*$";
+    NSString *validCharacters = @"^[a-zA-Z0-9 ]*$";
     NSPredicate *validate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", validCharacters];
     
     return [validate evaluateWithObject:string];
