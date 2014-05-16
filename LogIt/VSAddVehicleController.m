@@ -60,7 +60,9 @@
 
 -(IBAction)saveVehicle:(id)sender
 {
+    //Declaration for AppDelegate Method isConnected
     VSAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+    
     //Check Network Status
     BOOL connected = [appDelegate isConnected];
     
@@ -72,7 +74,7 @@
             PFQuery *query = [PFQuery queryWithClassName:@"Vehicles"];
             
             [query getObjectInBackgroundWithId:_details.vObjectId block:^(PFObject *vehicle, NSError *error) {
-                
+ 
                 
                 vehicle[@"make"] = self.make.text;
                 vehicle[@"model"] = self.model.text;
@@ -80,6 +82,12 @@
                 NSString *yearString = self.year.text;
                 NSString *modelString = self.model.text;
                 NSString *makeString = self.make.text;
+                
+                //Number Conversion
+                NSNumberFormatter *nf = [[NSNumberFormatter alloc] init];
+                [nf setNumberStyle:NSNumberFormatterNoStyle];
+                
+                NSNumber *vehicleYear = [nf numberFromString:yearString];
                 
                 //Validate Model and Make string
                 BOOL makeValid = [self validateVehicleMake:makeString];
@@ -99,7 +107,7 @@
                 }else if(makeString.length == 0 || makeValid == NO || makeString.length > 15){
                     
                     
-                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"InvalidVehicle Make" message:@"You have entered an invalid vehicle make, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Make" message:@"You have entered an invalid vehicle make, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
                     [alert show];
                     
                     
@@ -108,20 +116,21 @@
                     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Model" message:@"You have entered an invalid vehicle model, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
                     [alert show];
                     
+                }else if(vehicleYear.intValue < 1981 || vehicleYear.intValue > 2015){
+                    
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Year" message:@"You have entered an invalid vehicle Year, vehicle can not be older than 1981 or newer than 2015, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+                    [alert show];
+                    
+                    
+                    
                 }else{
-                    
-                    //Convert year string to NSNumber for parse
-                    NSNumberFormatter *nf = [[NSNumberFormatter alloc] init];
-                    [nf setNumberStyle:NSNumberFormatterNoStyle];
-                    
-                    NSNumber *vehicleYear = [nf numberFromString:yearString];
                     
                     vehicle[@"year"] = vehicleYear;
                     
                     
                     [vehicle saveInBackground];
                     
-                    updatedAlert = [[UIAlertView alloc] initWithTitle:@"Vehicle Updated" message:@"You vehicle information has been updated" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+                    updatedAlert = [[UIAlertView alloc] initWithTitle:@"Vehicle Updated" message:@"You vehicle information has been updated!" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
                     
                     [updatedAlert show];
                     
@@ -136,11 +145,17 @@
             NSString *makeString = self.make.text;
             NSString *modelString = self.model.text;
             NSString *yearString = self.year.text;
+
+            NSNumberFormatter *nf = [[NSNumberFormatter alloc] init];
+            [nf setNumberStyle:NSNumberFormatterNoStyle];
+            
+            NSNumber *vehicleYear = [nf numberFromString:yearString];
             
             
             //Booleans for Valid Vehicle Make and Model
             BOOL makeValid = [self validateVehicleMake:makeString];
             BOOL modelValid = [self validateVehicleModel:modelString];
+            //BOOL yearValid = [self validateYear:yearString];
             
             
             if(yearString.length < 4 && makeString.length == 0 && modelString.length == 0){
@@ -165,17 +180,21 @@
                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Model" message:@"You have entered an invalid vehicle model, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
                 [alert show];
                 
+        
+            }else if(vehicleYear.intValue < 1981 || vehicleYear.intValue > 2015){
+                
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Year" message:@"You have entered an invalid vehicle Year, vehicle can not be older than 1981 or newer than 2015, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+                [alert show];
+                
+                
+                
             }else{
                 
                 PFObject *vehicle = [PFObject objectWithClassName:@"Vehicles"];
                 vehicle[@"make"] = self.make.text;
                 vehicle[@"model"] = self.model.text;
                 
-                
-                NSNumberFormatter *nf = [[NSNumberFormatter alloc] init];
-                [nf setNumberStyle:NSNumberFormatterNoStyle];
-                
-                NSNumber *vehicleYear = [nf numberFromString:yearString];
+
                 
                 vehicle[@"year"] = vehicleYear;
                 
@@ -184,7 +203,7 @@
                 
                 [vehicle saveInBackground];
                 
-                savedAlert = [[UIAlertView alloc] initWithTitle:@"Vehicle Saved" message:@"You vehicle information has been saved" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+                savedAlert = [[UIAlertView alloc] initWithTitle:@"Vehicle Saved" message:@"You vehicle information has been saved!" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
                 
                 [savedAlert show];
             }
@@ -210,7 +229,7 @@
 //Method to Validate Make String
 -(BOOL)validateVehicleMake:(NSString*)string
 {
-    NSString *validCharacters = @"^[a-zA-Z]*$";
+    NSString *validCharacters = @"^[a-zA-Z ]*$";
     NSPredicate *validate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", validCharacters];
     
     return [validate evaluateWithObject:string];
