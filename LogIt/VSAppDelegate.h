@@ -9,12 +9,15 @@
 #import <UIKit/UIKit.h>
 #import "Reachability.h"
 #import <SystemConfiguration/SystemConfiguration.h>
+#import "VSVehicles.h"
+#import "VSVehicleInfo.h"
 
 #define ApplicationDelegate ((SSAppDelegate *)[UIApplication sharedApplication].delegate)
 
 @interface VSAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+
 
 -(BOOL)isConnected;
 

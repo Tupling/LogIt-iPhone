@@ -17,6 +17,7 @@
     UIAlertView *savedAlert;
     UIAlertView *updatedAlert;
     NSCharacterSet *blockedCharacters;
+
 }
 
 @end
@@ -35,8 +36,6 @@
 
 - (void)viewDidLoad
 {
-    
-    
     
     [super viewDidLoad];
     //Change TextView values depending on details

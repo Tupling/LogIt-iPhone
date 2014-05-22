@@ -9,6 +9,8 @@
 #import "VSAppDelegate.h"
 #import <Parse/Parse.h>
 #import "VSViewController.h"
+#import "VSVehicles.h"
+
 
 
 @implementation VSAppDelegate
@@ -20,10 +22,14 @@
    
     [Parse setApplicationId:@"dmSu69A9G1bgTrZYXMP3pAby8fiwYdefw8tXjumi"
                   clientKey:@"5Ug218rLZApSrZw7XsSi8NIaQhEuTh1gZU7VPMFg"];
+    
+    
+
 
     
     return YES;
 }
+
 
 -(BOOL)isConnected
 {

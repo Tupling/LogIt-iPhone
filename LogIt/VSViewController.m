@@ -17,6 +17,7 @@
     UIAlertView *loadingAlert;
     UIAlertView *logOutAlert;
     UIAlertView *deleteObject;
+
     
     
 }
@@ -36,7 +37,8 @@ bool delete = NO;
     if ([PFUser currentUser]) {
         if (connected == YES) {
             
-            [self loadData];
+                [self loadData];
+            
         }else {
             
             //TODO:
@@ -61,6 +63,65 @@ bool delete = NO;
     [super viewWillAppear:animated];
     
 }
+
+
+#pragma mark SYNC DATA
+-(void)syncData:(NSTimer *)timer{
+    PFQuery *query = [PFQuery queryWithClassName:@"Vehicles"];
+    NSLog(@"%ld", (long)[query countObjects]);
+    NSLog(@"%lu", (unsigned long)[self.vehicleArr count ]);
+    if (!(long)[query countObjects] == (unsigned long)[_vehicleArr count]) {
+        [query whereKey:@"updatedAt" greaterThan:self.lastSync];
+    }else{
+    [self.vehicleArr removeAllObjects];
+    }
+    [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
+        if(!error){
+            _vehicles = [VSVehicles storedVehicles];
+            for(int i = 0; i < objects.count; i++) {
+                _vehicleInfo = [[VSVehicleInfo alloc]init];
+                _vehicleInfo.vMake = [objects[i] valueForKey:@"make"];
+                _vehicleInfo.vModel = [objects[i] valueForKey:@"model"];
+                _vehicleInfo.vYear = [objects[i] valueForKey:@"year"];
+                _vehicleInfo.vObjectId = [objects[i] valueForKey:@"objectId"];
+                
+                
+                if(self.vehicles != nil){
+                    self.vehicleArr = _vehicles.vehiclesArray;
+                }
+                if (self.vehicleArr != nil) {
+
+                    NSLog(@"VehicleArray Object ID: %@", [self.vehicleArr valueForKeyPath:@"vObjectId"]);
+                    NSLog(@"Vehicle Info Object ID: %@", _vehicleInfo.vObjectId);
+                    if ([[self.vehicleArr valueForKeyPath:@"vObjectId"] containsObject:_vehicleInfo.vObjectId]) {
+                        int indexOfObj = [[self.vehicleArr valueForKeyPath:@"vObjectId"] containsObject:_vehicleInfo.vObjectId];
+                        NSLog(@"VehicleArray Object ID: %@", self.vehicleArr[i]);
+                        NSLog(@"Vehicle Info O;bject ID: %@", _vehicleInfo.vObjectId);
+                        [self.vehicleArr removeObjectAtIndex:indexOfObj];
+                       
+                    }
+                    [self.vehicleArr addObject:_vehicleInfo];
+                }
+                
+            }
+            
+        }else {
+            
+        }
+        NSLog(@"%lu", (unsigned long)[_vehicleArr count]);
+        //Reload table data
+        [self.tableView reloadData];
+        [self stopLoading];
+        self.lastSync = [NSDate date];
+        //Run MSync method every 10 seconds after initial Loading of Data.
+
+        NSLog(@"Last Synce Date: %@", self.lastSync);
+    }];
+}
+
+
+
+#pragma mark LOAD DATA
 -(void)loadData
 {
     [self loading:@"Loading Vehicles"];
@@ -80,6 +141,7 @@ bool delete = NO;
                 _vehicleInfo.vModel = [objects[i] valueForKey:@"model"];
                 _vehicleInfo.vYear = [objects[i] valueForKey:@"year"];
                 _vehicleInfo.vObjectId = [objects[i] valueForKey:@"objectId"];
+               
                 
                 if(_vehicles != nil){
                     _vehicleArr = _vehicles.vehiclesArray;
@@ -88,8 +150,9 @@ bool delete = NO;
                     
                     [_vehicleArr addObject:_vehicleInfo];
                 }
+
             }
-            
+
         }else {
             
         }
@@ -97,6 +160,10 @@ bool delete = NO;
         //Reload table data
         [self.tableView reloadData];
         [self stopLoading];
+        self.lastSync = [NSDate date];
+        //Run sync method every 10 seconds after initial data load.
+        [NSTimer scheduledTimerWithTimeInterval:25.0f target:self selector:@selector(syncData:) userInfo:nil repeats:YES];
+        NSLog(@"Last Synce Date: %@", self.lastSync);
     }];
 }
 
@@ -114,7 +181,6 @@ bool delete = NO;
 }
 
 #pragma mark TableView Methods
-
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
