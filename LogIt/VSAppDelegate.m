@@ -14,6 +14,10 @@
 
 
 @implementation VSAppDelegate
+{
+    NSData *storedObjectsToDelete;
+    NSArray *unarchivedObjects;
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -29,7 +33,6 @@
     //set Network status reachabilityt to internetConnection
     self.networkStatus = [Reachability reachabilityForInternetConnection];
     
-    [ApplicationDelegate.networkStatus startNotifier];
     
     //Set Userdefaults
     self.storedData = [NSUserDefaults standardUserDefaults];
@@ -38,34 +41,15 @@
     //Set deleteobjects array to data stored in userdefault object deleteObject
     //This data is stored in VSViewController if user deletes an object or objects
     //and while offline. This data will be saved even if the user closes the application.
-    NSData *storeObjectsToDelete = [ApplicationDelegate.storedData objectForKey:@"deleteObject"];
-    if(storeObjectsToDelete != nil){
-        NSArray *unarchiveObjects = [NSKeyedUnarchiver unarchiveObjectWithData:storeObjectsToDelete];
-        if (unarchiveObjects != nil) {
-            self.deleteObjects = [[NSMutableArray alloc] initWithArray:unarchiveObjects];
-            if (self.deleteObjects != nil) {
-                for (int i = 0; i < self.deleteObjects.count; i++) {
-                    VSVehicleInfo *vehicleInfo = [self.deleteObjects objectAtIndex:i];
-                    NSString *objectIdString = vehicleInfo.vObjectId;
-                    
-                    PFQuery *deleteQuery = [PFQuery queryWithClassName:@"Vehicles"];
-                    PFObject *object = [deleteQuery getObjectWithId:objectIdString];
-                    
-                    [object deleteInBackground];
-                }
-                NSLog(@"All objects have been removed from the server");
-                [self.deleteObjects removeAllObjects];
-                NSData *vehicleData = [NSKeyedArchiver archivedDataWithRootObject:self.deleteObjects];
-                [ApplicationDelegate.storedData setObject:vehicleData forKey:@"deleteObject"];
-                [ApplicationDelegate.storedData synchronize];
-            }
-
-        }else{
-            self.deleteObjects = [[NSMutableArray alloc] init];
+    storedObjectsToDelete = [ApplicationDelegate.storedData objectForKey:@"deleteObject"];
+    if(storedObjectsToDelete != nil){
+        unarchivedObjects = [NSKeyedUnarchiver unarchiveObjectWithData:storedObjectsToDelete];
+        if (unarchivedObjects != nil) {
+            self.deleteObjects = [NSMutableArray arrayWithArray:unarchivedObjects];
         }
+    }else{
+        self.deleteObjects = [[NSMutableArray alloc] init];
     }
-
-    
     
     return YES;
 }
@@ -81,25 +65,14 @@
         NSLog(@"NO NETWORK CONNECTION STATUS CODE = %ld", [self.networkStatus currentReachabilityStatus]);
         
     }else if (netStatus == ReachableViaWiFi || netStatus == ReachableViaWWAN){
-        if (self.deleteObjects != nil) {
-            for (int i = 0; i < self.deleteObjects.count; i++) {
-                VSVehicleInfo *vehicleInfo = [self.deleteObjects objectAtIndex:i];
-                NSString *objectIdString = vehicleInfo.vObjectId;
-                
-                PFQuery *deleteQuery = [PFQuery queryWithClassName:@"Vehicles"];
-                PFObject *object = [deleteQuery getObjectWithId:objectIdString];
-     
-                [object deleteInBackground];
-            }
-            NSLog(@"All objects have been removed from the server");
-            [self.deleteObjects removeAllObjects];
-        }
-        NSLog(@"DELETE OBJECTS COUNT %lu", (unsigned long)self.deleteObjects.count);
+        
+        NSLog(@"NETWORK CONNECTION AVAILABLE STATUS CODE = %ld", [self.networkStatus currentReachabilityStatus]);
     }
     
-    NSLog(@"NETWORK CONNECTION AVAILABLE STATUS CODE = %ld", [self.networkStatus currentReachabilityStatus]);
+    
     
 }
+
 
 //Check for network Connection
 -(BOOL)isConnected
@@ -109,6 +82,30 @@
     NetworkStatus status = [connected currentReachabilityStatus];
     
     return status;
+}
+-(void)deleteSavedUserDefaults:(NSArray *)arhiveArray
+{
+    self.deleteObjects = [[NSMutableArray alloc] initWithArray:arhiveArray];
+    if (self.deleteObjects != nil) {
+        if (self.isConnected == YES) {
+            
+            
+            for (int i = 0; i < self.deleteObjects.count; i++) {
+                VSVehicleInfo *vehicleInfo = [self.deleteObjects objectAtIndex:i];
+                NSString *objectIdString = vehicleInfo.vObjectId;
+                
+                PFQuery *deleteQuery = [PFQuery queryWithClassName:@"Vehicles"];
+                PFObject *object = [deleteQuery getObjectWithId:objectIdString];
+                
+                [object deleteInBackground];
+            }
+            NSLog(@"All objects have been removed from the server");
+            [self.deleteObjects removeAllObjects];
+            NSData *vehicleData = [NSKeyedArchiver archivedDataWithRootObject:self.deleteObjects];
+            [ApplicationDelegate.storedData setObject:vehicleData forKey:@"deleteObject"];
+            [ApplicationDelegate.storedData synchronize];
+        }
+    }
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application
@@ -135,7 +132,7 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
-    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    
 }
 
 @end

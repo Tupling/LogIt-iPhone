@@ -20,6 +20,8 @@
     UIAlertView *deleteObject;
     PFQuery *query;
     BOOL objectUpdated;
+    NSTimer *autoCall;
+    int objectCount;
 }
 
 @end
@@ -27,32 +29,28 @@
 
 
 @implementation VSViewController
--(void)viewDidLoad{
-    [super viewDidLoad];
 
-    
-}
 -(void)viewWillAppear:(BOOL)animated
 {
+    
     if ([ApplicationDelegate.networkStatus currentReachabilityStatus] == 1) {
         if ([PFUser currentUser]) {
-            [NSTimer scheduledTimerWithTimeInterval:25.0f target:self selector:@selector(syncData:) userInfo:nil repeats:YES];
+            
             [self syncData:nil];
+            
             
         }else{
             
-            [self loadData];
+            [self requireLogin];
         }
         
     }else{
         [self requireLogin];
     }
 }
-
-
--(void)viewWillDisappear:(BOOL)animated
+-(void)viewDidAppear:(BOOL)animated
 {
-    [ApplicationDelegate.networkStatus stopNotifier];
+    [ApplicationDelegate.networkStatus startNotifier];
 }
 
 
@@ -61,10 +59,24 @@
 -(void)syncData:(NSTimer *)timer{
     
     //Ensure Sync Method is only executed when active connection exist
-    if ([ApplicationDelegate.networkStatus currentReachabilityStatus] == 1) {
+    if (ApplicationDelegate.isConnected == YES) {
+        
+        
+        //Sync offline edited objects
+        [self syncOfflineEditedObject];
+        
+        
         query = [PFQuery queryWithClassName:@"Vehicles"];
-        query.cachePolicy = kPFCachePolicyNetworkElseCache;
-        if (![query countObjects] == (unsigned long)[_vehicleArr count]) {
+        //Get ObjectCount from Server and compare to vehicleArr count
+        [query countObjectsInBackgroundWithBlock:^(int number, NSError *error) {
+            objectCount = number;
+        }];
+        
+        //cancel query on thread before continuing to sync data
+        [query cancel];
+        
+        //query.cachePolicy = kPFCachePolicyNetworkElseCache;
+        if (!objectCount == (unsigned long)[_vehicleArr count]) {
             if(self.lastSync != nil){
                 [query whereKey:@"updatedAt" greaterThan:self.lastSync];
             }
@@ -101,12 +113,16 @@
                 
             }else {
                 
+                NSLog(@"No Network Connection");
+                
             }
             NSLog(@"%lu", (unsigned long)[_vehicleArr count]);
             //Reload table data
             [self.tableView reloadData];
             
             self.lastSync = [NSDate date];
+            [autoCall invalidate];
+            autoCall = [NSTimer scheduledTimerWithTimeInterval:25.0f target:self selector:@selector(syncData:) userInfo:nil repeats:YES];
             NSLog(@"Last Synce Date: %@", self.lastSync);
             [query cancel];
         }];
@@ -121,6 +137,12 @@
 -(void)loadData
 {
     [self loading:@"Loading Vehicles"];
+    
+    if (ApplicationDelegate.isConnected == YES) {
+        //Sync offline edited objects
+        [self syncOfflineEditedObject];
+    }
+    
     //Query Parse Database and place object in vehicleArr
     query = [PFQuery queryWithClassName:@"Vehicles"];
     query.cachePolicy = kPFCachePolicyNetworkElseCache;
@@ -153,7 +175,8 @@
         [self.tableView reloadData];
         [self stopLoading];
         self.lastSync = [NSDate date];
-        
+        [autoCall invalidate];
+        autoCall = [NSTimer scheduledTimerWithTimeInterval:25.0f target:self selector:@selector(syncData:) userInfo:nil repeats:YES];
         NSLog(@"Last Synce Date: %@", self.lastSync);
         [query cancel];
     }];
@@ -285,10 +308,12 @@
 //Login Failed Method
 -(void)logInViewController:(PFLogInViewController *)logInController didFailToLogInWithError:(NSError *)error
 {
-    if ([ApplicationDelegate.networkStatus currentReachabilityStatus] == 1) {
+    if (ApplicationDelegate.isConnected == YES) {
         
         if([error code] == 101){
             [[[UIAlertView alloc] initWithTitle:@"Login Failed" message:@"Invalid login credentials. Please check your username and password and try again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+        }else if([error code] == 1109){
+            
         }
     }else{
         [[[UIAlertView alloc] initWithTitle:@"No Connection" message:@"You do not have an active connection at this time." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
@@ -302,6 +327,7 @@
 {
     NSLog(@"%@ Logged In",[[PFUser currentUser] username]);
     
+    [self loadData];
     
     [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -309,8 +335,7 @@
 - (BOOL)logInViewController:(PFLogInViewController *)logInController shouldBeginLogInWithUsername:(NSString *)username password:(NSString *)password {
     
     
-    
-    if ([ApplicationDelegate.networkStatus currentReachabilityStatus] == 1) {
+    if (ApplicationDelegate.isConnected == YES) {
         
         // Check if both fields are completed
         if (username && password && username.length && password.length) {
@@ -395,7 +420,7 @@
             NSUInteger rowIndex = deleteObject.tag;
             _vehicleInfo = [_vehicleArr objectAtIndex:rowIndex];
             
-            if([ApplicationDelegate.networkStatus currentReachabilityStatus] == 0){
+            if(ApplicationDelegate.isConnected == NO){
                 if (ApplicationDelegate.deleteObjects == nil) {
                     ApplicationDelegate.deleteObjects = [[NSMutableArray alloc]init];
                 }
@@ -434,9 +459,37 @@
     }
     
 }
--(void)pendingDeletion:(PFObject*)vehicle
+
+-(void)syncOfflineEditedObject
 {
-    
-    
+    NSData *storedObjectsToDelete = [ApplicationDelegate.storedData objectForKey:@"deleteObject"];
+    if(storedObjectsToDelete != nil){
+        NSArray *unarchivedObjects = [NSKeyedUnarchiver unarchiveObjectWithData:storedObjectsToDelete];
+        if (unarchivedObjects != nil) {
+            if(ApplicationDelegate.deleteObjects.count > 0){
+                for (int i = 0; i < ApplicationDelegate.deleteObjects.count; i++) {
+                    VSVehicleInfo *vehicleInfo = [ApplicationDelegate.deleteObjects objectAtIndex:i];
+                    NSString *objectIdString = vehicleInfo.vObjectId;
+                    
+                    PFQuery *deleteQuery = [PFQuery queryWithClassName:@"Vehicles"];
+                    PFObject *object = [deleteQuery getObjectWithId:objectIdString];
+                    
+                    [object deleteInBackground];
+                }
+                NSLog(@"All objects have been removed from the server");
+                [ApplicationDelegate.deleteObjects removeAllObjects];
+                NSData *vehicleData = [NSKeyedArchiver archivedDataWithRootObject:ApplicationDelegate.deleteObjects];
+                [ApplicationDelegate.storedData setObject:vehicleData forKey:@"deleteObject"];
+                [ApplicationDelegate.storedData synchronize];
+            }
+        }
+        
+    }else{
+        NSData *savedModifiedObjects = [ApplicationDelegate.storedData objectForKey:@"modifyObjects"];
+        if (savedModifiedObjects != nil) {
+            
+        }
+        
+    }
 }
 @end

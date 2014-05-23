@@ -12,12 +12,11 @@
 
 @interface VSAddVehicleController () <UIAlertViewDelegate, UITextFieldDelegate>
 {
-    Reachability *connection;
     UIAlertView *noConnection;
     UIAlertView *savedAlert;
     UIAlertView *updatedAlert;
     NSCharacterSet *blockedCharacters;
-
+    
 }
 
 @end
@@ -59,23 +58,23 @@
 
 -(IBAction)saveVehicle:(id)sender
 {
-    //Declaration for AppDelegate Method isConnected
-    VSAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
-    
-    //Check Network Status
-    BOOL connected = [appDelegate isConnected];
     
     
-    if(connected == YES){
+    if(ApplicationDelegate.isConnected == YES){
+        
+        
+#pragma mark
+#pragma UPDATE VEHICLE INFO
+        
+        //Updating Data
+        //
         
         if(self.details != nil) {
             PFQuery *query = [PFQuery queryWithClassName:@"Vehicles"];
             
             [query getObjectInBackgroundWithId:_details.vObjectId block:^(PFObject *vehicle, NSError *error) {
- 
                 
-                vehicle[@"make"] = self.make.text;
-                vehicle[@"model"] = self.model.text;
+
                 
                 NSString *yearString = self.year.text;
                 NSString *modelString = self.model.text;
@@ -87,44 +86,14 @@
                 
                 NSNumber *vehicleYear = [nf numberFromString:yearString];
                 
-                //Validate Model and Make string
-                BOOL makeValid = [self validateVehicleMake:makeString];
-                BOOL modelValid = [self validateVehicleModel:modelString];
+                BOOL stringsValid = [self validateStringMake:makeString modelString:modelString yearString:yearString];
                 
-                
-                if(yearString.length < 4 && makeString.length == 0 && modelString.length == 0){
-                    
-                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Missing Information" message:@"Some fields were left blank, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-                    [alert show];
-                    
-                }else if(yearString.length < 4){
-                    
-                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Year" message:@"You have entered an invalid vehicle year, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-                    [alert show];
-                    
-                }else if(makeString.length == 0 || makeValid == NO || makeString.length > 15){
-                    
-                    
-                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Make" message:@"You have entered an invalid vehicle make, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-                    [alert show];
-                    
-                    
-                }else if(modelString.length == 0 || modelValid == NO){
-                    
-                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Model" message:@"You have entered an invalid vehicle model, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-                    [alert show];
-                    
-                }else if(vehicleYear.intValue < 1981 || vehicleYear.intValue > 2015){
-                    
-                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Year" message:@"You have entered an invalid vehicle Year, vehicle can not be older than 1981 or newer than 2015, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-                    [alert show];
-                    
-                    
-                    
-                }else{
+                //check for valid strings
+                if(stringsValid){
                     
                     vehicle[@"year"] = vehicleYear;
-                    
+                    vehicle[@"make"] = self.make.text;
+                    vehicle[@"model"] = self.model.text;
                     
                     [vehicle saveInBackground];
                     
@@ -135,7 +104,11 @@
                 }
             }];
             
+#pragma mark
+#pragma ADD NEW VEHICLE
             
+            //Adding new Vehicle
+            //
         } else {
             
             
@@ -143,56 +116,23 @@
             NSString *makeString = self.make.text;
             NSString *modelString = self.model.text;
             NSString *yearString = self.year.text;
-
+            
             NSNumberFormatter *nf = [[NSNumberFormatter alloc] init];
             [nf setNumberStyle:NSNumberFormatterNoStyle];
             
             NSNumber *vehicleYear = [nf numberFromString:yearString];
             
+            BOOL stringsValid = [self validateStringMake:makeString modelString:modelString yearString:yearString];
             
-            //Booleans for Valid Vehicle Make and Model
-            BOOL makeValid = [self validateVehicleMake:makeString];
-            BOOL modelValid = [self validateVehicleModel:modelString];
-            //BOOL yearValid = [self validateYear:yearString];
-            
-            
-            if(yearString.length < 4 && makeString.length == 0 && modelString.length == 0){
+            //check for valid strings
+            if(stringsValid){
                 
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Missing Information" message:@"Some fields were left blank, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-                [alert show];
-                
-            }else if(yearString.length < 4){
-                
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Year" message:@"You have entered an invalid vehicle year, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-                [alert show];
-                
-            }else if(makeString.length == 0 || makeValid == NO || makeString.length > 15){
-                
-                
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Make" message:@"You have entered an invalid vehicle make, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-                [alert show];
-                
-                
-            }else if(modelString.length == 0 || modelValid == NO){
-                
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Model" message:@"You have entered an invalid vehicle model, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-                [alert show];
-                
-        
-            }else if(vehicleYear.intValue < 1981 || vehicleYear.intValue > 2015){
-                
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Year" message:@"You have entered an invalid vehicle Year, vehicle can not be older than 1981 or newer than 2015, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-                [alert show];
-                
-                
-                
-            }else{
                 
                 PFObject *vehicle = [PFObject objectWithClassName:@"Vehicles"];
                 vehicle[@"make"] = self.make.text;
                 vehicle[@"model"] = self.model.text;
                 
-
+                
                 
                 vehicle[@"year"] = vehicleYear;
                 
@@ -211,13 +151,13 @@
                     [savedAlert show];
                 }
                 
-
+                
             }
+        
+    
         }
-        //NSLog(@"Make: %@ ", make.text);
-        
-        
-        
+#pragma mark
+#pragma  SAVE OFFLINE
     }else {
         
         noConnection = [[UIAlertView alloc] initWithTitle:@"No Connection" message:@"You do not have an active connection. Please connect to a network and try again." delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
@@ -226,11 +166,10 @@
         
     }
     
-    
-    //check if details is nil. Update object or save new object
-    
-    
+
 }
+#pragma mark
+#pragma VALIDATION METHODS
 
 //Method to Validate Make String
 -(BOOL)validateVehicleMake:(NSString*)string
@@ -263,15 +202,67 @@
     
 }
 
-/*
- #pragma mark - Navigation
- 
- // In a storyboard-based application, you will often want to do a little preparation before navigation
- - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
- {
- // Get the new view controller using [segue destinationViewController].
- // Pass the selected object to the new view controller.
- }
- */
+#pragma mark
+#pragma VALIDATE STRINGS
 
-@end
+-(BOOL)validateStringMake:(NSString*)vMake modelString:(NSString*)vModel yearString:(NSString*)vYear
+{
+    
+    //Booleans for Valid Vehicle Make and Model
+    BOOL makeValid = [self validateVehicleMake:vMake];
+    BOOL modelValid = [self validateVehicleModel:vModel];
+
+    if(vYear.length < 4 && vMake.length == 0 && vModel.length == 0){
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Missing Information" message:@"Some fields were left blank, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+        [alert show];
+        
+        return NO;
+        
+    }else if(vYear.length < 4){
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Year" message:@"You have entered an invalid vehicle year, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+        [alert show];
+        
+        return NO;
+        
+    }else if(vMake.length == 0 || makeValid == NO || vMake.length > 15){
+        
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Make" message:@"You have entered an invalid vehicle make, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+        [alert show];
+        
+        return NO;
+        
+    }else if(vModel.length == 0 || modelValid == NO){
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Model" message:@"You have entered an invalid vehicle model, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+        [alert show];
+        
+        return NO;
+        
+    }else if(vYear.intValue < 1981 || vYear.intValue > 2015){
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Invalid Vehicle Year" message:@"You have entered an invalid vehicle Year, vehicle can not be older than 1981 or newer than 2015, please check your entry and try again." delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+        [alert show];
+        
+        return NO;
+        
+        
+    }else{
+        return YES;
+    }
+}
+
+    /*
+     #pragma mark - Navigation
+     
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+     {
+     // Get the new view controller using [segue destinationViewController].
+     // Pass the selected object to the new view controller.
+     }
+     */
+    
+    @end

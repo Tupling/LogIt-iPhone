@@ -18,7 +18,9 @@
 
 @property (strong, nonatomic) UIWindow *window;
 @property(strong, nonatomic) Reachability *networkStatus;
+//Stored Deleted Object Array
 @property (strong, nonatomic) NSMutableArray *deleteObjects;
+//Stored Save Objects Array
 @property(strong, nonatomic) NSMutableArray *saveObjects;
 @property(strong, nonatomic) NSUserDefaults *storedData;
 @property (strong, nonatomic)VSVehicleInfo *vehicleInfo;
