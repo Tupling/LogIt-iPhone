@@ -68,7 +68,6 @@
     
     if(connected == YES){
         
-        
         if(self.details != nil) {
             PFQuery *query = [PFQuery queryWithClassName:@"Vehicles"];
             
@@ -201,10 +200,18 @@
                 vehicle.ACL = [PFACL ACLWithUser:[PFUser currentUser]];
                 
                 [vehicle saveInBackground];
+                if (vehicle.save) {
+                    
+                    savedAlert = [[UIAlertView alloc] initWithTitle:@"Vehicle Saved" message:@"You vehicle information has been saved!" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+                    
+                    [savedAlert show];
+                }else{
+                    savedAlert = [[UIAlertView alloc] initWithTitle:@"Save Error" message:@"There was an error trying to save your vehicle information!" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+                    
+                    [savedAlert show];
+                }
                 
-                savedAlert = [[UIAlertView alloc] initWithTitle:@"Vehicle Saved" message:@"You vehicle information has been saved!" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
-                
-                [savedAlert show];
+
             }
         }
         //NSLog(@"Make: %@ ", make.text);

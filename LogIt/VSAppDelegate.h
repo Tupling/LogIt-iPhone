@@ -12,12 +12,16 @@
 #import "VSVehicles.h"
 #import "VSVehicleInfo.h"
 
-#define ApplicationDelegate ((SSAppDelegate *)[UIApplication sharedApplication].delegate)
+#define ApplicationDelegate ((VSAppDelegate *)[UIApplication sharedApplication].delegate)
 
 @interface VSAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
-
+@property(strong, nonatomic) Reachability *networkStatus;
+@property (strong, nonatomic) NSMutableArray *deleteObjects;
+@property(strong, nonatomic) NSMutableArray *saveObjects;
+@property(strong, nonatomic) NSUserDefaults *storedData;
+@property (strong, nonatomic)VSVehicleInfo *vehicleInfo;
 
 -(BOOL)isConnected;
 
