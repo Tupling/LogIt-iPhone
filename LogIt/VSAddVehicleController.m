@@ -132,8 +132,7 @@
                 vehicle[@"make"] = self.make.text;
                 vehicle[@"model"] = self.model.text;
                 
-                
-                
+            
                 vehicle[@"year"] = vehicleYear;
                 
                 
@@ -159,13 +158,59 @@
 #pragma mark
 #pragma  SAVE OFFLINE
     }else {
+        //Year input validation done with Number Keyboard & it must consist of 4 digits//
+        NSString *makeString = self.make.text;
+        NSString *modelString = self.model.text;
+        NSString *yearString = self.year.text;
         
-        noConnection = [[UIAlertView alloc] initWithTitle:@"No Connection" message:@"You do not have an active connection. Please connect to a network and try again." delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+        NSNumberFormatter *nf = [[NSNumberFormatter alloc] init];
+        [nf setNumberStyle:NSNumberFormatterNoStyle];
         
-        [noConnection show];
+        NSNumber *vehicleYear = [nf numberFromString:yearString];
         
+        BOOL stringsValid = [self validateStringMake:makeString modelString:modelString yearString:yearString];
+        
+        //check for valid strings
+        if(stringsValid){
+
+            _details = [[VSVehicleInfo alloc]init];
+            _details.vMake = makeString;
+            _details.vModel = modelString;
+            _details.vYear = vehicleYear;
+            
+            if (ApplicationDelegate.saveObjects == nil) {
+                ApplicationDelegate.saveObjects = [[NSMutableArray alloc]init];
+            }
+            
+            if (ApplicationDelegate.storedData != nil) {
+                NSData *dataArray = [ApplicationDelegate.storedData objectForKey:@"savedOfflineObjects"];
+                if(dataArray != nil){
+                    NSArray *defaultArray = [NSKeyedUnarchiver unarchiveObjectWithData:dataArray];
+                    ApplicationDelegate.saveObjects = [NSMutableArray arrayWithArray:defaultArray];
+                    [ApplicationDelegate.saveObjects addObject:_details];
+                    NSData *vehicleData = [NSKeyedArchiver archivedDataWithRootObject:ApplicationDelegate.saveObjects];
+                    [ApplicationDelegate.storedData setObject:vehicleData forKey:@"savedOfflineObjects"];
+                }else {
+                    [ApplicationDelegate.saveObjects addObject:_details];
+                    NSData *vehicleData = [NSKeyedArchiver archivedDataWithRootObject:ApplicationDelegate.saveObjects];
+                    [ApplicationDelegate.storedData setObject:vehicleData forKey:@"savedOfflineObjects"];
+                }
+                [ApplicationDelegate.storedData synchronize];
+            }
+            
+            [ApplicationDelegate.userVehicles addObject:_details];
+            NSData *data = [NSKeyedArchiver archivedDataWithRootObject:ApplicationDelegate.userVehicles];
+            [ApplicationDelegate.storedData setObject:data forKey:@"userVehicles"];
+            [ApplicationDelegate.storedData synchronize];
+            
+            NSLog(@"delete objects array count: %lu", (unsigned long)ApplicationDelegate.saveObjects.count);
+
+            
+                savedAlert = [[UIAlertView alloc] initWithTitle:@"Vehicle Saved" message:@"You vehicle information has been saved!" delegate:self cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
+                
+                [savedAlert show];
+        }
     }
-    
 
 }
 #pragma mark

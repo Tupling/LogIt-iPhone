@@ -23,6 +23,9 @@
 //Stored Save Objects Array
 @property(strong, nonatomic) NSMutableArray *saveObjects;
 @property(strong, nonatomic) NSUserDefaults *storedData;
+//User Stored Objects Saved
+@property(strong, nonatomic) NSMutableArray *userVehicles;
+
 @property (strong, nonatomic)VSVehicleInfo *vehicleInfo;
 
 -(BOOL)isConnected;

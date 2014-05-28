@@ -23,7 +23,6 @@
 @property (nonatomic, strong) VSVehicles* vehicles;
 @property (nonatomic, strong) VSVehicleInfo *vehicleInfo;
 @property (nonatomic, strong) IBOutlet UITableView *tableView;
-@property (nonatomic, strong) NSMutableArray *vehicleArr;
 @property(nonatomic, strong)  NSDate *lastSync;
 @property(strong, nonatomic) Reachability *networkStatus;
 

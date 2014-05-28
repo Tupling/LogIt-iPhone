@@ -37,6 +37,20 @@
     //Set Userdefaults
     self.storedData = [NSUserDefaults standardUserDefaults];
     
+    //Initiate userVehicles Array
+    if(self.userVehicles != nil){
+        NSData *storedVehicleData = [ApplicationDelegate.storedData objectForKey:@"userVehicles"];
+        if (storedVehicleData != nil) {
+            NSArray *storedVehicleArray = [NSKeyedUnarchiver unarchiveObjectWithData:storedVehicleData];
+            if (storedVehicleData != nil) {
+                self.userVehicles = [NSMutableArray arrayWithArray:storedVehicleArray];
+            }
+        }
+        
+    }else{
+        self.userVehicles = [[NSMutableArray alloc] init];
+    }
+    
     
     //Set deleteobjects array to data stored in userdefault object deleteObject
     //This data is stored in VSViewController if user deletes an object or objects
@@ -49,6 +63,15 @@
         }
     }else{
         self.deleteObjects = [[NSMutableArray alloc] init];
+    }
+    
+    //get UserVehicles from Defaults
+    NSData *storedVehicleData = [self.storedData objectForKey:@"userVehicles"];
+    if(storedVehicleData != nil){
+        NSArray *unarchivedArray = [NSKeyedUnarchiver unarchiveObjectWithData:storedVehicleData];
+        if(unarchivedArray != nil){
+            self.userVehicles = [NSMutableArray arrayWithArray:unarchivedArray];
+        }
     }
     
     return YES;
@@ -77,7 +100,7 @@
 //Check for network Connection
 -(BOOL)isConnected
 {
-    Reachability *connected = [Reachability reachabilityForInternetConnection];
+    Reachability *connected = [Reachability reachabilityWithHostName:@"www.daletupling.com"];
     
     NetworkStatus status = [connected currentReachabilityStatus];
     
@@ -88,7 +111,6 @@
     self.deleteObjects = [[NSMutableArray alloc] initWithArray:arhiveArray];
     if (self.deleteObjects != nil) {
         if (self.isConnected == YES) {
-            
             
             for (int i = 0; i < self.deleteObjects.count; i++) {
                 VSVehicleInfo *vehicleInfo = [self.deleteObjects objectAtIndex:i];
@@ -132,7 +154,19 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
-    
+    if (self.storedData != nil) {
+        NSData *dataArray = [self.storedData objectForKey:@"userVehicles"];
+        if(dataArray != nil){
+            NSArray *defaultArray = [NSKeyedUnarchiver unarchiveObjectWithData:dataArray];
+            self.userVehicles = [NSMutableArray arrayWithArray:defaultArray];
+            NSData *vehicleData = [NSKeyedArchiver archivedDataWithRootObject:self.userVehicles];
+            [self.storedData setObject:vehicleData forKey:@"userVehicles"];
+        }else {
+            NSData *vehicleData = [NSKeyedArchiver archivedDataWithRootObject:self.userVehicles];
+            [self.storedData setObject:vehicleData forKey:@"userVehicles"];
+        }
+        [self.storedData synchronize];
+    }
 }
 
 @end

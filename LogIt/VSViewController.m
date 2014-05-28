@@ -32,11 +32,28 @@
 
 -(void)viewWillAppear:(BOOL)animated
 {
+    [ApplicationDelegate.networkStatus startNotifier];
     
-    if ([ApplicationDelegate.networkStatus currentReachabilityStatus] == 1) {
+    NSLog(@"Network Connect = %d", ApplicationDelegate.isConnected);
+    if (ApplicationDelegate.isConnected == NO) {
+
+            NSData *storedVehicleData = [ApplicationDelegate.storedData objectForKey:@"userVehicles"];
+            if (storedVehicleData != nil) {
+                NSArray *storedVehicleArray = [NSKeyedUnarchiver unarchiveObjectWithData:storedVehicleData];
+                if (storedVehicleData != nil) {
+                    ApplicationDelegate.userVehicles = [NSMutableArray arrayWithArray:storedVehicleArray];
+                }
+            }
+        
+        NSLog(@"ARRAY COUNT = %lu", (unsigned long)ApplicationDelegate.userVehicles.count);
+        
+        [self.tableView reloadData];
+        
+    }else{
         if ([PFUser currentUser]) {
             
             [self syncData:nil];
+            
             
             
         }else{
@@ -44,13 +61,11 @@
             [self requireLogin];
         }
         
-    }else{
-        [self requireLogin];
     }
 }
 -(void)viewDidAppear:(BOOL)animated
 {
-    [ApplicationDelegate.networkStatus startNotifier];
+    
 }
 
 
@@ -76,13 +91,13 @@
         [query cancel];
         
         //query.cachePolicy = kPFCachePolicyNetworkElseCache;
-        if (!objectCount == (unsigned long)[_vehicleArr count]) {
+        if (!objectCount == (unsigned long)[ApplicationDelegate.userVehicles count]) {
             if(self.lastSync != nil){
                 [query whereKey:@"updatedAt" greaterThan:self.lastSync];
             }
         }else{
             
-            [self.vehicleArr removeAllObjects];
+            [ApplicationDelegate.userVehicles removeAllObjects];
         }
         [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
             if(!error){
@@ -95,28 +110,35 @@
                     _vehicleInfo.vObjectId = [objects[i] valueForKey:@"objectId"];
                     
                     
-                    if(self.vehicles != nil){
-                        self.vehicleArr = _vehicles.vehiclesArray;
+                    if(ApplicationDelegate.userVehicles != nil){
+                        ApplicationDelegate.userVehicles = _vehicles.vehiclesArray;
                     }
-                    if (self.vehicleArr != nil) {
+                    if (ApplicationDelegate.userVehicles != nil) {
                         
-                        if ([[self.vehicleArr valueForKeyPath:@"vObjectId"] containsObject:_vehicleInfo.vObjectId]) {
-                            int indexOfObj = [[self.vehicleArr valueForKeyPath:@"vObjectId"] containsObject:_vehicleInfo.vObjectId];
+                        if ([[ApplicationDelegate.userVehicles valueForKeyPath:@"vObjectId"] containsObject:_vehicleInfo.vObjectId]) {
+                            int indexOfObj = [[ApplicationDelegate.userVehicles valueForKeyPath:@"vObjectId"] containsObject:_vehicleInfo.vObjectId];
                             
-                            [self.vehicleArr removeObjectAtIndex:indexOfObj];
+                            [ApplicationDelegate.userVehicles removeObjectAtIndex:indexOfObj];
                             
                         }
-                        [self.vehicleArr addObject:_vehicleInfo];
+                        [ApplicationDelegate.userVehicles addObject:_vehicleInfo];
                     }
                     
+                    NSData *vehicleData = [NSKeyedArchiver archivedDataWithRootObject:ApplicationDelegate.userVehicles];
+                    [ApplicationDelegate.storedData setObject:vehicleData forKey:@"userVehicles"];
+                    
+                    
                 }
+                [ApplicationDelegate.storedData synchronize];
                 
-            }else {
                 
-                NSLog(@"No Network Connection");
+            }else{
+                
+                //Load User Defaults
+                [self.tableView reloadData];
                 
             }
-            NSLog(@"%lu", (unsigned long)[_vehicleArr count]);
+            NSLog(@"Stored Vehicles in UserVehicles Array: %lu", (unsigned long)[ApplicationDelegate.userVehicles count]);
             //Reload table data
             [self.tableView reloadData];
             
@@ -157,12 +179,12 @@
                 _vehicleInfo.vObjectId = [objects[i] valueForKey:@"objectId"];
                 
                 
-                if(_vehicles != nil){
-                    _vehicleArr = _vehicles.vehiclesArray;
+                if(ApplicationDelegate.userVehicles != nil){
+                    ApplicationDelegate.userVehicles = _vehicles.vehiclesArray;
                 }
-                if (_vehicleArr != nil) {
+                if (ApplicationDelegate.userVehicles != nil) {
                     
-                    [_vehicleArr addObject:_vehicleInfo];
+                    [ApplicationDelegate.userVehicles addObject:_vehicleInfo];
                 }
                 
             }
@@ -170,7 +192,7 @@
         }else {
             
         }
-        NSLog(@"%lu", (unsigned long)[_vehicleArr count]);
+        NSLog(@"%lu", (unsigned long)[ApplicationDelegate.userVehicles count]);
         //Reload table data
         [self.tableView reloadData];
         [self stopLoading];
@@ -200,7 +222,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
     
-    return [_vehicleArr count];
+    return [ApplicationDelegate.userVehicles count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -212,7 +234,7 @@
     }
     
     //Make sure vehicleArr has objects
-    if(_vehicleArr.count != 0){
+    if(ApplicationDelegate.userVehicles.count != 0){
         
         //Set Cell Labels by Tag ID
         UILabel *vehicleYear = (UILabel*)[cell viewWithTag:101];
@@ -220,7 +242,7 @@
         UILabel *vehicleModel = (UILabel *) [cell viewWithTag:103];
         
         //Load Vehicle Info
-        VSVehicleInfo *vehicleInfo = [_vehicleArr objectAtIndex:indexPath.row];
+        VSVehicleInfo *vehicleInfo = [ApplicationDelegate.userVehicles objectAtIndex:indexPath.row];
         
         NSString *vYearString = [NSString stringWithFormat:@"%@", vehicleInfo.vYear];
         
@@ -239,7 +261,7 @@
     
     
     
-    _vehicleInfo = [_vehicleArr objectAtIndex:indexPath.row];
+    _vehicleInfo = [ApplicationDelegate.userVehicles objectAtIndex:indexPath.row];
     
     NSLog(@"%@", _vehicleInfo.vYear);
     [self performSegueWithIdentifier:@"details" sender:nil];
@@ -257,7 +279,7 @@
 {
     if(editingStyle == UITableViewCellEditingStyleDelete){
         
-        _vehicleInfo = [_vehicleArr objectAtIndex:indexPath.row];
+        _vehicleInfo = [ApplicationDelegate.userVehicles objectAtIndex:indexPath.row];
         
         
         deleteObject = [[UIAlertView alloc] initWithTitle:@"Delete Vehicle" message:@"Are you sure you want to delete this vehicle?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Yes", nil];
@@ -281,7 +303,7 @@
         
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
         VSVehicleDetailsController *detailsView = segue.destinationViewController;
-        detailsView.details = [_vehicleArr objectAtIndex:indexPath.row];
+        detailsView.details = [ApplicationDelegate.userVehicles objectAtIndex:indexPath.row];
     }
 }
 
@@ -404,7 +426,7 @@
             NSLog(@"User Logged Out!");
             
             //Remove all object before signing user out
-            [_vehicleArr removeAllObjects];
+            [ApplicationDelegate.userVehicles removeAllObjects];
             [self.tableView reloadData];
             
             //require use to login in
@@ -418,7 +440,7 @@
             
             PFObject *vehicle = [PFObject objectWithoutDataWithClassName:@"Vehicles" objectId:_vehicleInfo.vObjectId];
             NSUInteger rowIndex = deleteObject.tag;
-            _vehicleInfo = [_vehicleArr objectAtIndex:rowIndex];
+            _vehicleInfo = [ApplicationDelegate.userVehicles objectAtIndex:rowIndex];
             
             if(ApplicationDelegate.isConnected == NO){
                 if (ApplicationDelegate.deleteObjects == nil) {
@@ -440,14 +462,14 @@
                     [ApplicationDelegate.storedData synchronize];
                 }
                 
-                [self.vehicleArr removeObjectAtIndex:rowIndex];
+                [ApplicationDelegate.userVehicles removeObjectAtIndex:rowIndex];
                 [self.tableView reloadData];
                 
                 NSLog(@"delete objects array count: %lu", (unsigned long)ApplicationDelegate.deleteObjects.count);
                 
             }else{
                 [vehicle deleteInBackground];
-                [self.vehicleArr removeObjectAtIndex:rowIndex];
+                [ApplicationDelegate.userVehicles removeObjectAtIndex:rowIndex];
                 [self.tableView reloadData];
                 
                 
@@ -462,32 +484,65 @@
 
 -(void)syncOfflineEditedObject
 {
-    NSData *storedObjectsToDelete = [ApplicationDelegate.storedData objectForKey:@"deleteObject"];
-    if(storedObjectsToDelete != nil){
-        NSArray *unarchivedObjects = [NSKeyedUnarchiver unarchiveObjectWithData:storedObjectsToDelete];
-        if (unarchivedObjects != nil) {
-            if(ApplicationDelegate.deleteObjects.count > 0){
-                for (int i = 0; i < ApplicationDelegate.deleteObjects.count; i++) {
-                    VSVehicleInfo *vehicleInfo = [ApplicationDelegate.deleteObjects objectAtIndex:i];
-                    NSString *objectIdString = vehicleInfo.vObjectId;
-                    
-                    PFQuery *deleteQuery = [PFQuery queryWithClassName:@"Vehicles"];
-                    PFObject *object = [deleteQuery getObjectWithId:objectIdString];
-                    
-                    [object deleteInBackground];
-                }
-                NSLog(@"All objects have been removed from the server");
-                [ApplicationDelegate.deleteObjects removeAllObjects];
-                NSData *vehicleData = [NSKeyedArchiver archivedDataWithRootObject:ApplicationDelegate.deleteObjects];
-                [ApplicationDelegate.storedData setObject:vehicleData forKey:@"deleteObject"];
-                [ApplicationDelegate.storedData synchronize];
-            }
-        }
+    if (ApplicationDelegate.deleteObjects.count > 0) {
         
-    }else{
-        NSData *savedModifiedObjects = [ApplicationDelegate.storedData objectForKey:@"modifyObjects"];
-        if (savedModifiedObjects != nil) {
+        NSData *storedObjectsToDelete = [ApplicationDelegate.storedData objectForKey:@"deleteObject"];
+        if(storedObjectsToDelete != nil){
+            NSArray *unarchivedObjects = [NSKeyedUnarchiver unarchiveObjectWithData:storedObjectsToDelete];
+            if (unarchivedObjects != nil) {
+                if(ApplicationDelegate.deleteObjects.count > 0){
+                    for (int i = 0; i < ApplicationDelegate.deleteObjects.count; i++) {
+                        VSVehicleInfo *vehicleInfo = [ApplicationDelegate.deleteObjects objectAtIndex:i];
+                        NSString *objectIdString = vehicleInfo.vObjectId;
+                        
+                        PFQuery *deleteQuery = [PFQuery queryWithClassName:@"Vehicles"];
+                        PFObject *object = [deleteQuery getObjectWithId:objectIdString];
+                        
+                        [object deleteInBackground];
+                    }
+                    NSLog(@"All objects have been removed from the server");
+                    [ApplicationDelegate.deleteObjects removeAllObjects];
+                    NSData *vehicleData = [NSKeyedArchiver archivedDataWithRootObject:ApplicationDelegate.deleteObjects];
+                    [ApplicationDelegate.storedData setObject:vehicleData forKey:@"deleteObject"];
+                    [ApplicationDelegate.storedData synchronize];
+                }
+            }
             
+        }
+    }
+    if(ApplicationDelegate.saveObjects.count > 0){
+        NSData *savedModifiedObjects = [ApplicationDelegate.storedData objectForKey:@"savedOfflineObjects"];
+        if (savedModifiedObjects != nil) {
+            NSArray *unarchiveSavedObjects = [NSKeyedUnarchiver unarchiveObjectWithData:savedModifiedObjects];
+            if(unarchiveSavedObjects != nil){
+                if (ApplicationDelegate.saveObjects.count > 0) {
+                    for (int i = 0; i < ApplicationDelegate.saveObjects.count; i++) {
+                        VSVehicleInfo *vehicleInfor = [ApplicationDelegate.saveObjects objectAtIndex:i];
+                        NSString *vehicleMake = vehicleInfor.vMake;
+                        NSString *vehicleModel = vehicleInfor.vModel;
+                        NSNumber *vehicleYear = vehicleInfor.vYear;
+                        
+                        PFObject *vehicle = [PFObject objectWithClassName:@"Vehicles"];
+                        vehicle[@"make"] = vehicleMake;
+                        vehicle[@"model"] = vehicleModel;
+                        
+                        
+                        vehicle[@"year"] = vehicleYear;
+                        
+                        
+                        vehicle.ACL = [PFACL ACLWithUser:[PFUser currentUser]];
+                        
+                        [vehicle saveInBackground];
+                    }
+                    NSLog(@"All offline saved objects have been saved to db");
+                    [ApplicationDelegate.saveObjects removeAllObjects];
+                    NSData *vehicleData = [NSKeyedArchiver archivedDataWithRootObject:ApplicationDelegate.saveObjects];
+                    [ApplicationDelegate.storedData setObject:vehicleData forKey:@"savedOfflineObjects"];
+                    [ApplicationDelegate.storedData synchronize];
+                    
+                }
+                
+            }
         }
         
     }
