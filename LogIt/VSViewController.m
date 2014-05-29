@@ -36,18 +36,19 @@
     
     NSLog(@"Network Connect = %d", ApplicationDelegate.isConnected);
     if (ApplicationDelegate.isConnected == NO) {
-
-            NSData *storedVehicleData = [ApplicationDelegate.storedData objectForKey:@"userVehicles"];
+        
+        NSData *storedVehicleData = [ApplicationDelegate.storedData objectForKey:@"userVehicles"];
+        if (storedVehicleData != nil) {
+            NSArray *storedVehicleArray = [NSKeyedUnarchiver unarchiveObjectWithData:storedVehicleData];
             if (storedVehicleData != nil) {
-                NSArray *storedVehicleArray = [NSKeyedUnarchiver unarchiveObjectWithData:storedVehicleData];
-                if (storedVehicleData != nil) {
-                    ApplicationDelegate.userVehicles = [NSMutableArray arrayWithArray:storedVehicleArray];
-                }
+                ApplicationDelegate.userVehicles = [NSMutableArray arrayWithArray:storedVehicleArray];
             }
+        }
         
         NSLog(@"ARRAY COUNT = %lu", (unsigned long)ApplicationDelegate.userVehicles.count);
         
         [self.tableView reloadData];
+        autoCall = [NSTimer scheduledTimerWithTimeInterval:25.0f target:self selector:@selector(syncData:) userInfo:nil repeats:YES];
         
     }else{
         if ([PFUser currentUser]) {
@@ -304,6 +305,8 @@
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
         VSVehicleDetailsController *detailsView = segue.destinationViewController;
         detailsView.details = [ApplicationDelegate.userVehicles objectAtIndex:indexPath.row];
+        detailsView.details.objectIndex = indexPath.row;
+        NSLog(@"SELECTED OBJECT INDEX %ld", (long)indexPath.row);
     }
 }
 
@@ -546,5 +549,43 @@
         }
         
     }
+    if (ApplicationDelegate.updateObjects.count > 0) {
+        NSData *updatedObjects = [ApplicationDelegate.storedData objectForKey:@"updatedObjects"];
+        if (updatedObjects != nil) {
+            NSArray *unarchiveData =[NSKeyedUnarchiver unarchiveObjectWithData:updatedObjects];
+            if (unarchiveData != nil) {
+                if (ApplicationDelegate.updateObjects.count > 0) {
+                    for (int i = 0; i < ApplicationDelegate.updateObjects.count; i++) {
+                        VSVehicleInfo *vehicleData = [ApplicationDelegate.updateObjects objectAtIndex:i];
+                        NSString *vehicleObjectId = vehicleData.vObjectId;
+                        NSLog(@"Vehicle ID: %@", vehicleData.vObjectId);
+                        
+                        PFQuery *newQuery = [PFQuery queryWithClassName:@"Vehicles"];
+                        
+                        [newQuery getObjectInBackgroundWithId:vehicleObjectId block:^(PFObject *vehicle, NSError *error) {
+                        
+                            NSString *vehicleMake = vehicleData.vMake;
+                        NSString *vehicleModel = vehicleData.vModel;
+                        NSNumber *vehicleYear = vehicleData.vYear;
+   
+                            vehicle[@"year"] = vehicleYear;
+                            vehicle[@"make"] = vehicleMake;
+                            vehicle[@"model"] = vehicleModel;
+                            
+                            [vehicle saveInBackground];
+  
+                        }];
+                        NSLog(@"All offline updated objects have been saved to db");
+                        [ApplicationDelegate.updateObjects removeAllObjects];
+                        NSData *vehicleArhivedData = [NSKeyedArchiver archivedDataWithRootObject:ApplicationDelegate.updateObjects];
+                        [ApplicationDelegate.storedData setObject:vehicleArhivedData forKey:@"updatedObjects"];
+                        [ApplicationDelegate.storedData synchronize];
+
+                    }
+                }
+            }
+        }
+    }
 }
+
 @end

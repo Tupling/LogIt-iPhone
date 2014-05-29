@@ -52,6 +52,8 @@
     
     VSAddVehicleController *editVehicle = segue.destinationViewController;
     editVehicle.details = _details;
+        NSLog(@"%lu", (unsigned long)self.details.objectIndex);
+    editVehicle.details.objectIndex = _details.objectIndex;
 
         
     }

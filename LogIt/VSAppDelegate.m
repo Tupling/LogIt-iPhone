@@ -17,6 +17,7 @@
 {
     NSData *storedObjectsToDelete;
     NSArray *unarchivedObjects;
+    VSViewController *mainViewController;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions

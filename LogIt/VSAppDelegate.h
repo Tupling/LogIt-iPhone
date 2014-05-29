@@ -22,6 +22,9 @@
 @property (strong, nonatomic) NSMutableArray *deleteObjects;
 //Stored Save Objects Array
 @property(strong, nonatomic) NSMutableArray *saveObjects;
+//Update Objects Stored
+@property(strong, nonatomic)NSMutableArray *updateObjects;
+
 @property(strong, nonatomic) NSUserDefaults *storedData;
 //User Stored Objects Saved
 @property(strong, nonatomic) NSMutableArray *userVehicles;
